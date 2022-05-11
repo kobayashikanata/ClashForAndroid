@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import com.github.kr328.clash.common.Global
+import java.util.*
 
 class StatusProvider : ContentProvider() {
     override fun call(method: String, arg: String?, extras: Bundle?): Bundle? {
@@ -79,5 +80,6 @@ class StatusProvider : ContentProvider() {
                 }
             }
         var currentProfile: String? = null
+        var currentUUID: UUID? = null
     }
 }

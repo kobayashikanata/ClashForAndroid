@@ -34,12 +34,7 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
         val config = install(ConfigurationModule(self))
         val network = install(NetworkObserveModule(self))
         val sideload = install(SideloadDatabaseModule(self))
-
-        if (store.dynamicNotification)
-            install(DynamicNotificationModule(self))
-        else
-            install(StaticNotificationModule(self))
-
+        install(NotificationModule(self))
         install(AppListCacheModule(self))
         install(TimeZoneModule(self))
         install(SuspendModule(self))
@@ -94,8 +89,7 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
 
         StatusProvider.serviceRunning = true
 
-        StaticNotificationModule.createNotificationChannel(this)
-        StaticNotificationModule.notifyLoadingNotification(this)
+        NotificationModule.onServiceCreated(this)
 
         runtime.launch()
     }

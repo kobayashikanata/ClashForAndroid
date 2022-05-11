@@ -17,6 +17,7 @@ buildscript {
         classpath(libs.build.kotlin.serialization)
         classpath(libs.build.ksp)
         classpath(libs.build.golang)
+        classpath("com.github.kezong:fat-aar:1.3.8")
     }
 }
 
@@ -27,15 +28,12 @@ subprojects {
         maven("https://maven.kr328.app/releases")
     }
 
-    val isApp = name == "app"
+    val isApp = false
 
     apply(plugin = if (isApp) "com.android.application" else "com.android.library")
 
     extensions.configure<BaseExtension> {
         defaultConfig {
-            if (isApp) {
-                applicationId = "com.github.kr328.clash"
-            }
 
             minSdk = 21
             targetSdk = 31
@@ -63,29 +61,16 @@ subprojects {
 
         compileSdkVersion(defaultConfig.targetSdk!!)
 
-        if (isApp) {
-            packagingOptions {
-                excludes.add("DebugProbesKt.bin")
-            }
+        sourceSets {
+            maybeCreate("foss")
+            maybeCreate("premium")
         }
-
         productFlavors {
             flavorDimensions("feature")
 
-            create("foss") {
+            create("premium") {
                 isDefault = true
                 dimension = flavorDimensionList[0]
-                versionNameSuffix = ".foss"
-
-                buildConfigField("boolean", "PREMIUM", "Boolean.parseBoolean(\"false\")")
-
-                if (isApp) {
-                    applicationIdSuffix = ".foss"
-                }
-            }
-            create("premium") {
-                dimension = flavorDimensionList[0]
-                versionNameSuffix = ".premium"
 
                 buildConfigField("boolean", "PREMIUM", "Boolean.parseBoolean(\"true\")")
 
@@ -102,48 +87,34 @@ subprojects {
                     )
                 }
             }
-        }
 
-        signingConfigs {
-            val keystore = rootProject.file("signing.properties")
-            if (keystore.exists()) {
-                create("release") {
-                    val prop = Properties().apply {
-                        keystore.inputStream().use(this::load)
-                    }
+            create("foss") {
+                dimension = flavorDimensionList[0]
 
-                    storeFile = rootProject.file(prop.getProperty("keystore.path")!!)
-                    storePassword = prop.getProperty("keystore.password")!!
-                    keyAlias = prop.getProperty("key.alias")!!
-                    keyPassword = prop.getProperty("key.password")!!
-                }
+                buildConfigField("boolean", "PREMIUM", "Boolean.parseBoolean(\"false\")")
             }
         }
 
         buildTypes {
-            named("release") {
-                isMinifyEnabled = isApp
-                isShrinkResources = isApp
-                signingConfig = signingConfigs.findByName("release")
-                proguardFiles(
-                    getDefaultProguardFile("proguard-android-optimize.txt"),
-                    "proguard-rules.pro"
-                )
-            }
             named("debug") {
-                versionNameSuffix = ".debug"
+
+            }
+            named("release") {
+                isMinifyEnabled = false
+                isShrinkResources = false
             }
         }
 
         buildFeatures.apply {
             dataBinding {
-                isEnabled = name != "hideapi"
+                isEnabled = false
             }
         }
 
         variantFilter {
-            ignore = name.startsWith("premium") && !project(":core")
-                .file("src/premium/golang/clash/go.mod").exists()
+//            ignore = name.startsWith("premium") && !project(":core")
+//                .file("src/premium/golang/clash/go.mod").exists()
+            ignore = false
         }
 
         if (isApp) {

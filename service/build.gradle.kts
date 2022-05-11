@@ -4,11 +4,12 @@ plugins {
     id("kotlinx-serialization")
     id("com.android.library")
     id("com.google.devtools.ksp")
+    id("maven-publish")
 }
 
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":common"))
+    compileOnly(project(":core"))
+    compileOnly(project(":common"))
 
     ksp(libs.kaidl.compiler)
     kapt(libs.androidx.room.compiler)

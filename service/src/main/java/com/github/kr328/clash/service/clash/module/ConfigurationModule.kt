@@ -64,6 +64,7 @@ class ConfigurationModule(service: Service) : Module<ConfigurationModule.LoadExc
                 SelectionDao().removeSelections(active.uuid, remove)
 
                 StatusProvider.currentProfile = active.name
+                StatusProvider.currentUUID = active.uuid
 
                 service.sendProfileLoaded(current)
 
