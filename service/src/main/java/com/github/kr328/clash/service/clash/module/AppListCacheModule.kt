@@ -1,5 +1,6 @@
 package com.github.kr328.clash.service.clash.module
 
+import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageInfo
@@ -13,7 +14,22 @@ class AppListCacheModule(service: Service) : Module<Unit>(service) {
     private fun PackageInfo.uniqueUidName(): String =
         if (sharedUserId != null && sharedUserId.isNotBlank()) sharedUserId else packageName
 
-    private fun reload() {
+    private fun reload(){
+        try{
+            reloadUnsafe()
+        }catch (e:Throwable){
+            e.printStackTrace()
+        }
+    }
+
+//    if app use clash service not support query pkg
+//    please add below to manifest
+//    <uses-permission
+//    android:name="android.permission.QUERY_ALL_PACKAGES"
+//    tools:node="remove"
+//    tools:ignore="QueryAllPackagesPermission" />
+    @SuppressLint("QueryPermissionsNeeded")
+    private fun reloadUnsafe() {
         val packages = service.packageManager.getInstalledPackages(0)
             .groupBy { it.uniqueUidName() }
             .map { (_, v) ->

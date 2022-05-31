@@ -143,12 +143,12 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
             when (store.accessControlMode) {
                 AccessControlMode.AcceptAll -> Unit
                 AccessControlMode.AcceptSelected -> {
-                    (store.accessControlPackages + packageName).forEach {
+                    (store.accessControlPackages).forEach {
                         runCatching { addAllowedApplication(it) }
                     }
                 }
                 AccessControlMode.DenySelected -> {
-                    (store.accessControlPackages - packageName).forEach {
+                    (store.accessControlPackages).forEach {
                         runCatching { addDisallowedApplication(it) }
                     }
                 }

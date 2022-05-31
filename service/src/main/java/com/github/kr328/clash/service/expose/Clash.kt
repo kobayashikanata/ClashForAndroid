@@ -27,10 +27,10 @@ fun stopClash(context:Context){
 }
 
 fun startClash(context: Context, startTun:Boolean) =
-    context.startForegroundServiceCompat(intent(context, startTun))
+    context.startService(intent(context, startTun))
 
 fun startClashForeground(context: Context, startTun:Boolean) =
-    context.startService(intent(context, startTun))
+    context.startForegroundServiceCompat(intent(context, startTun))
 
 private fun intent(context: Context, startTun:Boolean):Intent{
     return if(startTun) TunService::class.intent

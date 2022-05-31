@@ -82,6 +82,7 @@ class Broadcasts(private val context: Application) {
             return
 
         try {
+            safelyUnregister()
             context.registerReceiver(broadcastReceiver, IntentFilter().apply {
                 addAction(Intents.ACTION_SERVICE_RECREATED)
                 addAction(Intents.ACTION_CLASH_STARTED)
@@ -90,10 +91,14 @@ class Broadcasts(private val context: Application) {
                 addAction(Intents.ACTION_PROFILE_LOADED)
             })
 
-            clashRunning = StatusClient(context).currentProfile() != null
+            registered = true
         } catch (e: Exception) {
             Log.w("Register global receiver: $e", e)
         }
+    }
+
+    fun loadStatusBlocking(){
+        clashRunning = StatusClient(context).currentProfile() != null
     }
 
     fun unregister() {
@@ -102,10 +107,19 @@ class Broadcasts(private val context: Application) {
 
         try {
             context.unregisterReceiver(broadcastReceiver)
+            registered = false
 
             clashRunning = false
         } catch (e: Exception) {
             Log.w("Unregister global receiver: $e", e)
+        }
+    }
+
+    private fun safelyUnregister(){
+        try {
+            context.unregisterReceiver(broadcastReceiver)
+        } catch (e: Exception) {
+            Log.w("unregister $e")
         }
     }
 }
