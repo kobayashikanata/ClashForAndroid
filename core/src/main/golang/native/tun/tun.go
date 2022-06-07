@@ -63,7 +63,7 @@ func Start(fd int, gateway, portal, dns string) (io.Closer, error) {
 			}
 
 			if shouldHijackDns(dnsAddr, rAddr.IP, rAddr.Port) {
-			    log.Debugln("[Dns] hijack")
+			    log.Debugln("[Dns] hijack tcp")
 				go func() {
 					defer conn.Close()
 
@@ -126,7 +126,7 @@ func Start(fd int, gateway, portal, dns string) (io.Closer, error) {
 			}
 
 			if shouldHijackDns(dnsAddr, rAddr.IP, rAddr.Port) {
-			    log.Debugln("[Dns] hijack")
+			    log.Debugln("[Dns] hijack udp")
 				go func() {
 					defer pool.Put(buf)
 

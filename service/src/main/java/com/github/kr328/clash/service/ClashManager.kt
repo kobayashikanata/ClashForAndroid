@@ -18,6 +18,16 @@ class ClashManager(private val context: Context) : IClashManager,
     private val store = ServiceStore(context)
     private var logReceiver: ReceiveChannel<LogMessage>? = null
 
+    override fun extHealthCheckAll() {
+        Clash.healthCheckAll()
+    }
+
+    override fun extHealthCheckBlocking(name: String) {
+        runBlocking {
+            Clash.healthCheck(name).await()
+        }
+    }
+
     override fun queryTunnelState(): TunnelState {
         return Clash.queryTunnelState()
     }
