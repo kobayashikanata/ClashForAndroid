@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.ServiceConnection
 import android.os.IBinder
 import com.github.kr328.clash.common.log.Log
-import com.github.kr328.clash.common.util.intent
 import com.github.kr328.clash.service.RemoteService
 import com.github.kr328.clash.service.remote.IRemoteService
 import com.github.kr328.clash.service.remote.unwrap
@@ -38,7 +37,7 @@ class Service(private val context: Context) {
 
     fun bind() {
         try {
-            context.bindService(RemoteService::class.intent, connection, Context.BIND_AUTO_CREATE)
+            context.bindService(RemoteService::class.intent(context), connection, Context.BIND_AUTO_CREATE)
         } catch (e: Exception) {
             e.printStackTrace()
             unbind()

@@ -3,6 +3,7 @@ package com.github.kr328.clash.service
 import android.content.Context
 import android.content.SharedPreferences
 import com.github.kr328.clash.common.constants.Authorities
+import com.github.kr328.clash.service.expose.globalInitConfirm
 import rikka.preference.MultiProcessPreference
 import rikka.preference.PreferenceProvider
 
@@ -15,6 +16,7 @@ class PreferenceProvider : PreferenceProvider() {
         private const val FILE_NAME = "service"
 
         fun createSharedPreferencesFromContext(context: Context): SharedPreferences {
+            globalInitConfirm(context)
             return when (context) {
                 is BaseService, is TunService ->
                     context.getSharedPreferences(

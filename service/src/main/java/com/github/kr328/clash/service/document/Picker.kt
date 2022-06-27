@@ -3,9 +3,8 @@ package com.github.kr328.clash.service.document
 import android.content.Context
 import android.provider.DocumentsContract
 import com.github.kr328.clash.service.R
-import com.github.kr328.clash.service.data.ImportedDao
+import com.github.kr328.clash.service.data.Database
 import com.github.kr328.clash.service.data.Pending
-import com.github.kr328.clash.service.data.PendingDao
 import com.github.kr328.clash.service.model.Profile
 import com.github.kr328.clash.service.util.importedDir
 import com.github.kr328.clash.service.util.pendingDir
@@ -15,7 +14,7 @@ import java.util.*
 class Picker(private val context: Context) {
     suspend fun list(path: Path): List<Document> {
         if (path.uuid == null) {
-            return ImportedDao().queryAllUUIDs().map {
+            return Database.ImportedDao(context).queryAllUUIDs().map {
                 pick(path.copy(uuid = it), false)
             }
         }
@@ -52,8 +51,8 @@ class Picker(private val context: Context) {
             cloneToPending(path.uuid)
         }
 
-        val imported = ImportedDao().queryByUUID(path.uuid)
-        val pending = PendingDao().queryByUUID(path.uuid)
+        val imported = Database.ImportedDao(context).queryByUUID(path.uuid)
+        val pending = Database.PendingDao(context).queryByUUID(path.uuid)
 
         if (path.scope == null) {
             if (writable)
@@ -121,13 +120,13 @@ class Picker(private val context: Context) {
     }
 
     private suspend fun cloneToPending(uuid: UUID) {
-        if (PendingDao().queryByUUID(uuid) != null)
+        if (Database.PendingDao(context).queryByUUID(uuid) != null)
             return
 
         val imported =
-            ImportedDao().queryByUUID(uuid) ?: throw FileNotFoundException("profile not found")
+            Database.ImportedDao(context).queryByUUID(uuid) ?: throw FileNotFoundException("profile not found")
 
-        PendingDao().insert(
+        Database.PendingDao(context).insert(
             Pending(
                 imported.uuid,
                 imported.name,

@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import com.github.kr328.clash.common.Global
+import com.github.kr328.clash.service.expose.globalInitConfirm
 import java.util.*
 
 class StatusProvider : ContentProvider() {
@@ -55,6 +56,7 @@ class StatusProvider : ContentProvider() {
     }
 
     override fun onCreate(): Boolean {
+        globalInitConfirm(context)
         return true
     }
 

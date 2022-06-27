@@ -4,8 +4,8 @@ import android.content.Context
 import com.github.kr328.clash.common.log.Log
 import com.github.kr328.clash.core.Clash
 import com.github.kr328.clash.core.model.*
+import com.github.kr328.clash.service.data.Database
 import com.github.kr328.clash.service.data.Selection
-import com.github.kr328.clash.service.data.SelectionDao
 import com.github.kr328.clash.service.remote.IClashManager
 import com.github.kr328.clash.service.remote.ILogObserver
 import com.github.kr328.clash.service.store.ServiceStore
@@ -61,9 +61,9 @@ class ClashManager(private val context: Context) : IClashManager,
             val current = store.activeProfile ?: return@also
 
             if (it) {
-                SelectionDao().setSelected(Selection(current, group, name))
+                Database.SelectionDao(context).setSelected(Selection(current, group, name))
             } else {
-                SelectionDao().removeSelected(current, group)
+                Database.SelectionDao(context).removeSelected(current, group)
             }
         }
     }

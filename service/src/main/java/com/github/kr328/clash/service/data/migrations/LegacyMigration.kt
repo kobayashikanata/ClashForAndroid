@@ -6,8 +6,8 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import androidx.core.text.isDigitsOnly
 import com.github.kr328.clash.common.log.Log
+import com.github.kr328.clash.service.data.Database
 import com.github.kr328.clash.service.data.Pending
-import com.github.kr328.clash.service.data.PendingDao
 import com.github.kr328.clash.service.model.Profile
 import com.github.kr328.clash.service.util.generateProfileUUID
 import com.github.kr328.clash.service.util.pendingDir
@@ -87,7 +87,7 @@ private suspend fun migrationFromLegacy234(
             val intervalValue = cursor.getLong(interval)
 
             val pending = Pending(
-                uuid = generateProfileUUID(),
+                uuid = generateProfileUUID(context),
                 name = cursor.getString(name),
                 type = newType,
                 source = if (newType != Profile.Type.File) cursor.getString(uri) else "",
@@ -111,7 +111,7 @@ private suspend fun migrationFromLegacy234(
                 }
             }
 
-            PendingDao().insert(pending)
+            Database.PendingDao(context).insert(pending)
 
             context.sendProfileChanged(pending.uuid)
 
@@ -160,7 +160,7 @@ private suspend fun migrationFromLegacy1(context: Context, legacy: SQLiteDatabas
             }
 
             val pending = Pending(
-                uuid = generateProfileUUID(),
+                uuid = generateProfileUUID(context),
                 name = cursor.getString(name),
                 type = newType,
                 source = source,
@@ -186,7 +186,7 @@ private suspend fun migrationFromLegacy1(context: Context, legacy: SQLiteDatabas
 
             legacyFile.delete()
 
-            PendingDao().insert(pending)
+            Database.PendingDao(context).insert(pending)
 
             context.sendProfileChanged(pending.uuid)
 

@@ -1,16 +1,17 @@
 package com.github.kr328.clash.service.expose
 
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import com.github.kr328.clash.common.Global
 import com.github.kr328.clash.common.compat.startForegroundServiceCompat
 import com.github.kr328.clash.common.constants.Intents
-import com.github.kr328.clash.common.util.intent
 import com.github.kr328.clash.core.Clash
 import com.github.kr328.clash.service.ClashService
 import com.github.kr328.clash.service.TunService
+import com.github.kr328.clash.service.data.Database
 import com.github.kr328.clash.service.data.Imported
-import com.github.kr328.clash.service.data.ImportedDao
 import com.github.kr328.clash.service.model.Profile
 import com.github.kr328.clash.service.util.importedDir
 import com.github.kr328.clash.service.util.sendBroadcastSelf
@@ -18,6 +19,7 @@ import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.*
+import kotlin.reflect.KClass
 
 fun queryTrafficNow() = Clash.queryTrafficNow()
 fun queryTrafficTotal() = Clash.queryTrafficTotal()
@@ -33,13 +35,13 @@ fun startClashForeground(context: Context, startTun:Boolean) =
     context.startForegroundServiceCompat(intent(context, startTun))
 
 private fun intent(context: Context, startTun:Boolean):Intent{
-    return if(startTun) TunService::class.intent
-    else ClashService::class.intent
+    return if(startTun) TunService::class.intent(context)
+    else ClashService::class.intent(context)
 }
 
 fun writeConfig(context: Context, uuid: UUID, name:String, text: String){
     getConfigFile(context, uuid).writeText(text, StandardCharsets.UTF_8)
-    importProfile(uuid, name)
+    importProfile(context, uuid, name)
 }
 
 fun getConfigFile(context:Context, uuid: UUID): File {
@@ -53,14 +55,14 @@ fun getConfigFile(context:Context, uuid: UUID): File {
     return file
 }
 
-fun importProfile(uuid:UUID, name:String){
+fun importProfile(context: Context, uuid:UUID, name:String){
     val model = Imported(
         uuid, name,
         Profile.Type.File, "", 0L,
         System.currentTimeMillis()
     )
     runBlocking {
-        val dao = ImportedDao()
+        val dao = Database.ImportedDao(context)
         if(!dao.exists(model.uuid)){
             dao.insert(model)
         }else{
@@ -75,4 +77,21 @@ fun Context.startForegroundServiceCompat(intent: Intent) {
     } else {
         startService(intent)
     }
+}
+
+fun globalInitConfirm(context: Context?){
+    if(context == null) return
+    if(context.applicationContext is Application){
+        init(context.applicationContext as Application)
+    }
+}
+
+fun init(application: Application?){
+    if(application != null){
+        Global.init(application)
+    }
+}
+
+fun KClass<*>.intent(context: Context): Intent {
+    return Intent(context, this.java)
 }

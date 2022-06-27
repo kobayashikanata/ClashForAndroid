@@ -1,13 +1,13 @@
 package com.github.kr328.clash.service.util
 
-import com.github.kr328.clash.service.data.ImportedDao
-import com.github.kr328.clash.service.data.PendingDao
+import android.content.Context
+import com.github.kr328.clash.service.data.Database
 import java.util.*
 
-suspend fun generateProfileUUID(): UUID {
+suspend fun generateProfileUUID(context: Context): UUID {
     var result = UUID.randomUUID()
 
-    while (ImportedDao().exists(result) || PendingDao().exists(result)) {
+    while (Database.ImportedDao(context).exists(result) ||Database. PendingDao(context).exists(result)) {
         result = UUID.randomUUID()
     }
 
