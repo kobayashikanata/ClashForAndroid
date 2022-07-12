@@ -1,6 +1,5 @@
 plugins {
     kotlin("android")
-    kotlin("kapt")
     id("kotlinx-serialization")
     id("com.android.library")
     id("com.google.devtools.ksp")
@@ -12,7 +11,7 @@ dependencies {
     compileOnly(project(":common"))
 
     ksp(libs.kaidl.compiler)
-    kapt(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
 
     implementation(libs.kotlin.coroutine)
     implementation(libs.kotlin.serialization.json)
@@ -26,7 +25,8 @@ dependencies {
 afterEvaluate {
     android {
         libraryVariants.forEach {
-            sourceSets[it.name].java.srcDir(buildDir.resolve("generated/ksp/${it.name}/kotlin"))
+            sourceSets[it.name].kotlin.srcDir(buildDir.resolve("generated/ksp/${it.name}/kotlin"))
+            sourceSets[it.name].java.srcDir(buildDir.resolve("generated/ksp/${it.name}/java"))
         }
     }
 }

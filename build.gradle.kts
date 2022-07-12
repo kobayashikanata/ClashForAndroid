@@ -17,7 +17,6 @@ buildscript {
         classpath(libs.build.kotlin.serialization)
         classpath(libs.build.ksp)
         classpath(libs.build.golang)
-        classpath("com.github.kezong:fat-aar:1.3.8")
     }
 }
 
@@ -28,18 +27,21 @@ subprojects {
         maven("https://maven.kr328.app/releases")
     }
 
-    val isApp = false
+    val isApp = name == "app"
 
     apply(plugin = if (isApp) "com.android.application" else "com.android.library")
 
     extensions.configure<BaseExtension> {
         defaultConfig {
+            if (isApp) {
+                applicationId = "com.github.kr328.clash"
+            }
 
             minSdk = 21
             targetSdk = 31
 
-            versionName = "2.5.9"
-            versionCode = 205009
+            versionName = "2.5.11"
+            versionCode = 205011
 
             resValue("string", "release_name", "v$versionName")
             resValue("integer", "release_code", "$versionCode")
@@ -61,60 +63,76 @@ subprojects {
 
         compileSdkVersion(defaultConfig.targetSdk!!)
 
-        sourceSets {
-            maybeCreate("foss")
-            maybeCreate("premium")
+        if (isApp) {
+            packagingOptions {
+                resources {
+                    excludes.add("DebugProbesKt.bin")
+                }
+            }
         }
+
         productFlavors {
             flavorDimensions("feature")
 
-            create("premium") {
+            create("foss") {
                 isDefault = true
                 dimension = flavorDimensionList[0]
-
-                buildConfigField("boolean", "PREMIUM", "Boolean.parseBoolean(\"true\")")
-
-                val tracker = rootProject.file("tracker.properties")
-                if (tracker.exists()) {
-                    val prop = Properties().apply {
-                        tracker.inputStream().use(this::load)
-                    }
-
-                    buildConfigField(
-                        "String",
-                        "APP_CENTER_KEY",
-                        "\"${prop.getProperty("appcenter.key")!!}\""
-                    )
-                }
-            }
-
-            create("foss") {
-                dimension = flavorDimensionList[0]
+                versionNameSuffix = ".foss"
 
                 buildConfigField("boolean", "PREMIUM", "Boolean.parseBoolean(\"false\")")
+
+                if (isApp) {
+                    applicationIdSuffix = ".foss"
+                }
+            }
+            create("premium") {
+                dimension = flavorDimensionList[0]
+                versionNameSuffix = ".premium"
+
+                buildConfigField("boolean", "PREMIUM", "Boolean.parseBoolean(\"true\")")
+            }
+        }
+
+        signingConfigs {
+            val keystore = rootProject.file("signing.properties")
+            if (keystore.exists()) {
+                create("release") {
+                    val prop = Properties().apply {
+                        keystore.inputStream().use(this::load)
+                    }
+
+                    storeFile = rootProject.file(prop.getProperty("keystore.path")!!)
+                    storePassword = prop.getProperty("keystore.password")!!
+                    keyAlias = prop.getProperty("key.alias")!!
+                    keyPassword = prop.getProperty("key.password")!!
+                }
             }
         }
 
         buildTypes {
-            named("debug") {
-
-            }
             named("release") {
-                isMinifyEnabled = false
-                isShrinkResources = false
+                isMinifyEnabled = isApp
+                isShrinkResources = isApp
+                signingConfig = signingConfigs.findByName("release")
+                proguardFiles(
+                    getDefaultProguardFile("proguard-android-optimize.txt"),
+                    "proguard-rules.pro"
+                )
+            }
+            named("debug") {
+                versionNameSuffix = ".debug"
             }
         }
 
         buildFeatures.apply {
             dataBinding {
-                isEnabled = false
+                isEnabled = name != "hideapi"
             }
         }
 
         variantFilter {
-//            ignore = name.startsWith("premium") && !project(":core")
-//                .file("src/premium/golang/clash/go.mod").exists()
-            ignore = false
+            ignore = name.startsWith("premium") && !project(":core")
+                .file("src/premium/golang/clash/go.mod").exists()
         }
 
         if (isApp) {
