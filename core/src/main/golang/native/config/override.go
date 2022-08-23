@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/Dreamacro/clash/constant"
+	"github.com/Dreamacro/clash/tikpatch"
 )
 
 type OverrideSlot int
@@ -14,7 +15,7 @@ const (
 	OverrideSlotSession
 )
 
-const defaultPersistOverride = `{}`
+const defaultPersistOverride = `{"redir-port": 0, "tproxy-port": 0}`
 const defaultSessionOverride = `{}`
 
 var sessionOverride = defaultSessionOverride
@@ -59,6 +60,7 @@ func WriteOverride(slot OverrideSlot, content string) {
 }
 
 func ClearOverride(slot OverrideSlot) {
+	tikpatch.ClearOverwrite()
 	switch slot {
 	case OverrideSlotPersist:
 		_ = os.Remove(overridePersistPath())

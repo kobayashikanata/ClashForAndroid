@@ -11,6 +11,15 @@ void (*fetch_report_func)(void *fetch_callback, const char *status_json);
 
 void (*fetch_complete_func)(void *fetch_callback, const char *error);
 
+void (*callback_string_func)(void *callback, const char *payload);
+
+void (*gts_packet_flow_output_packet_func)(void *callback, const char *packet);
+
+void (*gts_packet_flow_update_fd_func)(void *callback, int fd);
+
+int (*gts_packet_flow_can_reconnect_func)(void *callback);
+
+
 int (*logcat_received_func)(void *logcat_interface, const char *payload);
 
 int (*open_content_func)(const char *url, char *error, int error_length);
@@ -56,6 +65,34 @@ void fetch_report(void *fetch_callback, char *json_status) {
     fetch_report_func(fetch_callback, json_status);
 
     free(json_status);
+}
+
+void callback_string(void *callback, char *payload) {
+    TRACE_METHOD();
+
+    callback_string_func(callback, payload);
+
+    free(payload);
+}
+
+void gts_packet_flow_output_packet(void *callback, char *packet) {
+    TRACE_METHOD();
+
+    gts_packet_flow_output_packet_func(callback, packet);
+
+    free(packet);
+}
+
+void gts_packet_flow_update_fd(void *callback, int fd) {
+    TRACE_METHOD();
+
+    gts_packet_flow_update_fd_func(callback, fd);
+}
+
+int gts_packet_flow_can_reconnect(void *callback) {
+    TRACE_METHOD();
+
+    return gts_packet_flow_can_reconnect_func(callback);
 }
 
 int logcat_received(void *logcat_interface, char *payload) {

@@ -3,6 +3,8 @@ package com.github.kr328.clash.service
 import android.content.Context
 import com.github.kr328.clash.common.log.Log
 import com.github.kr328.clash.core.Clash
+import com.github.kr328.clash.core.bridge.Bridge
+import com.github.kr328.clash.core.bridge.StringCallback
 import com.github.kr328.clash.core.model.*
 import com.github.kr328.clash.service.data.Database
 import com.github.kr328.clash.service.data.Selection
@@ -17,6 +19,40 @@ class ClashManager(private val context: Context) : IClashManager,
     CoroutineScope by CoroutineScope(Dispatchers.IO) {
     private val store = ServiceStore(context)
     private var logReceiver: ReceiveChannel<LogMessage>? = null
+
+    override fun patchAddSessionBypassIp(ip: String) {
+        Bridge.patchAddBypassIp(ip)
+    }
+
+    override fun nativeTcpTestCancel(tag: Int) {
+        Bridge.nativeTcpTestCancel(tag)
+    }
+
+    override fun nativeTcpTest(
+        host: String,
+        timeout: Int,
+        maxCount: Int,
+        tag: Int,
+        send64Bytes: Boolean,
+        callback: IClashManager.StringCallback
+    ) {
+        Bridge.nativeTcpTest(host, timeout, maxCount, tag, send64Bytes) { value -> callback.call(value) }
+    }
+
+    override fun nativeTcpPing(
+        host: String,
+        pingCount: Int,
+        timeout: Int,
+        interval: Int,
+        groupCount: Int,
+        checkAlive: Boolean
+    ): String? {
+        return Bridge.nativeTcpPing(host, pingCount, timeout, interval, groupCount, checkAlive)
+    }
+
+    override fun nativeUdpPing(addr: String, count: Int, timeout: Int, packetLength: Int): String? {
+        return Bridge.nativeUdpPing(addr, count, timeout, packetLength)
+    }
 
     override fun extHealthCheckAll() {
         Clash.healthCheckAll()

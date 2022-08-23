@@ -1,7 +1,7 @@
 rootProject.name = "ClashForAndroid"
 
 //include(":app")
-//include(":clashtest")
+include(":testapp")
 //include(":design")
 include(":core")
 include(":service")

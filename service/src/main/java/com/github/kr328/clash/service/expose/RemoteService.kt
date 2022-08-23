@@ -11,8 +11,8 @@ import com.github.kr328.clash.service.remote.unwrap
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-class Service(private val context: Context) {
-    private var remote : IRemoteService? = null
+open class RemoteService(private val context: Context) {
+    public var remote : IRemoteService? = null
     private val latch = CountDownLatch(1)
 
 

@@ -330,6 +330,179 @@ Java_com_github_kr328_clash_core_bridge_Bridge_nativeSubscribeLogcat(JNIEnv *env
     subscribeLogcat(_callback);
 }
 
+JNIEXPORT void JNICALL
+Java_com_github_kr328_clash_core_bridge_Bridge_patchAddBypassIp(JNIEnv *env, jobject thiz, jstring ip) {
+
+    TRACE_METHOD();
+
+    scoped_string _ip = get_string(ip);
+
+    patchAddBypassIp(_ip);
+}
+
+
+JNIEXPORT void JNICALL
+Java_com_github_kr328_clash_core_bridge_Bridge_nativeTcpTest(JNIEnv *env, jobject thiz,
+                                                             jstring host,
+                                                             jint timeout,
+                                                             jint maxCount,
+                                                             jint tag,
+                                                             jboolean send64Bytes,
+                                                             jobject callback) {
+
+    TRACE_METHOD();
+
+    jobject _callback = new_global(callback);
+    scoped_string _host = get_string(host);
+
+    tcpTest(_host, timeout, maxCount, tag, send64Bytes, _callback);
+}
+
+JNIEXPORT void JNICALL
+Java_com_github_kr328_clash_core_bridge_Bridge_nativeTcpTestCancel(JNIEnv *env, jobject thiz, jint tag) {
+
+    TRACE_METHOD();
+
+    tcpTestCancel(tag);
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_github_kr328_clash_core_bridge_Bridge_nativeTcpPing(JNIEnv *env, jobject thiz,
+                                                             jstring host,
+                                                             jint pingCount,
+                                                             jint timeout,
+                                                             jint interval,
+                                                             jint groupCount,
+                                                             jboolean checkAlive) {
+
+    TRACE_METHOD();
+
+    scoped_string _host = get_string(host);
+    scoped_string response = tcpPing(_host, pingCount, timeout, interval, groupCount, checkAlive);
+    if (response == NULL)
+        return NULL;
+
+    return new_string(response);
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_github_kr328_clash_core_bridge_Bridge_nativeUdpPing(JNIEnv *env, jobject thiz,
+                                                             jstring addr,
+                                                             jint count,
+                                                             jint timeout,
+                                                             jint packetLength) {
+
+    TRACE_METHOD();
+
+    scoped_string _addr = get_string(addr);
+    scoped_string response = udpPing(_addr, count, timeout, packetLength);
+    if (response == NULL)
+        return NULL;
+
+    return new_string(response);
+}
+
+JNIEXPORT void JNICALL
+Java_com_github_kr328_clash_core_bridge_Bridge_patchStartTrojanByJson(JNIEnv *env, jobject thiz,jstring json) {
+
+    TRACE_METHOD();
+
+    scoped_string _json = get_string(json);
+    patchStartTrojanWithJson(_json);
+}
+
+JNIEXPORT void JNICALL
+Java_com_github_kr328_clash_core_bridge_Bridge_patchStopTrojan(JNIEnv *env, jobject thiz) {
+
+    TRACE_METHOD();
+
+    patchStopTrojan();
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_github_kr328_clash_core_bridge_Bridge_patchStartSSWithJson(JNIEnv *env, jobject thiz, jstring json) {
+
+    TRACE_METHOD();
+
+    scoped_string _json = get_string(json);
+    scoped_string response = patchStartSSWithJson(_json);
+    if (response == NULL)
+        return NULL;
+
+    return new_string(response);
+}
+
+JNIEXPORT void JNICALL
+Java_com_github_kr328_clash_core_bridge_Bridge_patchStopSS(JNIEnv *env, jobject thiz, jint tag) {
+
+    TRACE_METHOD();
+
+    patchStopSS(tag);
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_github_kr328_clash_core_bridge_Bridge_patchStartGtsWithFd(JNIEnv *env, jobject thiz,
+                                                                   jstring configJson,
+                                                                   jint fd,
+                                                                   jstring toolsJson,
+                                                                   jobject packetFlow) {
+
+    TRACE_METHOD();
+
+    scoped_string _configJson = get_string(configJson);
+    scoped_string _toolsJson = get_string(toolsJson);
+
+    scoped_string response = patchStartGtsWithFd(_configJson, fd, _toolsJson, packetFlow);
+    if (response == NULL)
+        return NULL;
+
+    return new_string(response);
+}
+
+JNIEXPORT void JNICALL
+Java_com_github_kr328_clash_core_bridge_Bridge_patchStopGts(JNIEnv *env, jobject thiz) {
+
+    TRACE_METHOD();
+
+    patchStopGts();
+}
+
+JNIEXPORT void JNICALL
+Java_com_github_kr328_clash_core_bridge_Bridge_patchSetGCPercent(JNIEnv *env, jobject thiz, jint percent) {
+
+    TRACE_METHOD();
+
+    patchSetGCPercent(percent);
+}
+
+JNIEXPORT void JNICALL
+Java_com_github_kr328_clash_core_bridge_Bridge_patchGC(JNIEnv *env, jobject thiz) {
+
+    TRACE_METHOD();
+
+    patchGC();
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_github_kr328_clash_core_bridge_Bridge_patchFinishLog(JNIEnv *env, jobject thiz) {
+
+    TRACE_METHOD();
+
+    scoped_string response = patchFinishLog();
+    if (response == NULL)
+        return NULL;
+
+    return new_string(response);
+}
+
+JNIEXPORT jint JNICALL
+Java_com_github_kr328_clash_core_bridge_Bridge_patchGetAllocMem(JNIEnv *env, jobject thiz) {
+
+    TRACE_METHOD();
+
+    return patchGetAllocMem();
+}
+
 static jmethodID m_tun_interface_mark_socket;
 static jmethodID m_tun_interface_query_socket_uid;
 static jmethodID m_completable_complete;
@@ -338,6 +511,10 @@ static jmethodID m_logcat_interface_received;
 static jmethodID m_clash_exception;
 static jmethodID m_fetch_callback_report;
 static jmethodID m_fetch_callback_complete;
+static jmethodID m_callback_string_call;
+static jmethodID m_gts_packet_flow_output_packet_call;
+static jmethodID m_gts_packet_flow_update_fd_call;
+static jmethodID m_gts_packet_flow_can_reconnect_call;
 static jmethodID m_open;
 static jmethodID m_get_message;
 static jclass c_clash_exception;
@@ -421,6 +598,56 @@ static void call_fetch_callback_complete_impl(void *fetch_callback, const char *
                            (jstring) _error);
 }
 
+static void call_callback_string_interface_impl(void *callback, const char *payload) {
+    TRACE_METHOD();
+
+    ATTACH_JNI();
+
+    jstring _payload = NULL;
+    if (payload != NULL)
+        _payload = new_string(payload);
+
+    (*env)->CallVoidMethod(env,
+                           (jobject) callback,
+                           (jmethodID) m_callback_string_call,
+                           (jstring) _payload);
+}
+
+static void gts_packet_flow_output_packet_interface_impl(void *callback, const char *payload) {
+    TRACE_METHOD();
+
+    ATTACH_JNI();
+
+    (*env)->CallVoidMethod(env,
+                           (jobject) callback,
+                           (jmethodID) m_gts_packet_flow_output_packet_call,
+                           (jbyteArray) payload);
+}
+
+static void gts_packet_flow_update_fd_interface_impl(void *callback, int fd) {
+    TRACE_METHOD();
+
+    ATTACH_JNI();
+
+    (*env)->CallVoidMethod(env,
+                           (jobject) callback,
+                           (jmethodID) m_gts_packet_flow_update_fd_call,
+                           (jint) fd);
+}
+
+static int gts_packet_flow_can_reconnect_interface_impl(void *callback) {
+    TRACE_METHOD();
+
+    ATTACH_JNI();
+
+    jboolean result = (*env)->CallBooleanMethod(env,
+                           (jobject) callback,
+                           (jmethodID) m_gts_packet_flow_can_reconnect_call);
+    if(result == JNI_TRUE)
+        return 1;
+    return 0;
+}
+
 static int call_logcat_interface_received_impl(void *callback, const char *payload) {
     TRACE_METHOD();
 
@@ -494,6 +721,8 @@ JNI_OnLoad(JavaVM *vm, void *reserved) {
     jclass c_fetch_callback = find_class("com/github/kr328/clash/core/bridge/FetchCallback");
     jclass c_logcat_interface = find_class("com/github/kr328/clash/core/bridge/LogcatInterface");
     jclass _c_clash_exception = find_class("com/github/kr328/clash/core/bridge/ClashException");
+    jclass c_callback_string = find_class("com/github/kr328/clash/core/bridge/StringCallback");
+    jclass c_gts_packet_flow = find_class("com/github/kr328/clash/core/bridge/IGtsPacketFlow");
     jclass _c_content = find_class("com/github/kr328/clash/core/bridge/Content");
     jclass c_throwable = find_class("java/lang/Throwable");
     jclass c_unit = find_class("kotlin/Unit");
@@ -508,6 +737,12 @@ JNI_OnLoad(JavaVM *vm, void *reserved) {
                                           "(Ljava/lang/String;)V");
     m_fetch_callback_complete = find_method(c_fetch_callback, "complete",
                                             "(Ljava/lang/String;)V");
+    m_callback_string_call = find_method(c_callback_string, "call",
+                                         "(Ljava/lang/String;)V");
+    m_gts_packet_flow_output_packet_call = find_method(c_gts_packet_flow, "outputPacket","([B)V");
+    m_gts_packet_flow_update_fd_call = find_method(c_gts_packet_flow, "updateFD","(I)V");
+    m_gts_packet_flow_can_reconnect_call = find_method(c_gts_packet_flow, "canReconnect","()Z");
+
     m_completable_complete_exceptionally = find_method(c_completable, "completeExceptionally",
                                                        "(Ljava/lang/Throwable;)Z");
     m_logcat_interface_received = find_method(c_logcat_interface, "received",
@@ -535,6 +770,10 @@ JNI_OnLoad(JavaVM *vm, void *reserved) {
     logcat_received_func = &call_logcat_interface_received_impl;
     open_content_func = &open_content_impl;
     release_object_func = &release_jni_object_impl;
+    callback_string_func = &call_callback_string_interface_impl;
+    gts_packet_flow_output_packet_func = &gts_packet_flow_output_packet_interface_impl;
+    gts_packet_flow_update_fd_func = &gts_packet_flow_update_fd_interface_impl;
+    gts_packet_flow_can_reconnect_func = &gts_packet_flow_can_reconnect_interface_impl;
 
     return JNI_VERSION_1_6;
 }

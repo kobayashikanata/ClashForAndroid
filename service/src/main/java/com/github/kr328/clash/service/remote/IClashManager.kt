@@ -26,4 +26,14 @@ interface IClashManager {
 
     fun extHealthCheckAll()
     fun extHealthCheckBlocking(name: String)
+    fun patchAddSessionBypassIp(ip:String)
+    fun nativeTcpTestCancel(tag:Int)
+    fun nativeTcpTest(host:String, timeout:Int, maxCount:Int, tag:Int, send64Bytes:Boolean, callback: StringCallback)
+    fun nativeTcpPing(host:String, pingCount:Int, timeout:Int, interval:Int, groupCount:Int, checkAlive:Boolean):String?
+    fun nativeUdpPing(addr:String, count:Int, timeout:Int, packetLength:Int):String?
+
+    @BinderInterface
+    interface StringCallback{
+        fun call(value:String?)
+    }
 }

@@ -17,6 +17,10 @@ buildscript {
         classpath(libs.build.kotlin.serialization)
         classpath(libs.build.ksp)
         classpath(libs.build.golang)
+        classpath("com.google.gms:google-services:4.3.13")
+        classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.1")
+        classpath("com.google.firebase:perf-plugin:1.4.1")
+        classpath("com.jakewharton:butterknife-gradle-plugin:10.2.1")
     }
 }
 
@@ -27,7 +31,7 @@ subprojects {
         maven("https://maven.kr328.app/releases")
     }
 
-    val isApp = name == "app"
+    val isApp = (name == "app" || name == "testapp")
 
     apply(plugin = if (isApp) "com.android.application" else "com.android.library")
 
@@ -48,7 +52,7 @@ subprojects {
 
             externalNativeBuild {
                 cmake {
-                    abiFilters("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+                    abiFilters("arm64-v8a", "armeabi-v7a")
                 }
             }
 
@@ -59,7 +63,7 @@ subprojects {
             }
         }
 
-        ndkVersion = "23.0.7599858"
+        ndkVersion = "20.1.5948944"
 
         compileSdkVersion(defaultConfig.targetSdk!!)
 

@@ -6,6 +6,7 @@ import android.os.IBinder
 import com.github.kr328.clash.common.log.Log
 import com.github.kr328.clash.service.clash.clashRuntime
 import com.github.kr328.clash.service.clash.module.*
+import com.github.kr328.clash.service.expose.ClockModule
 import com.github.kr328.clash.service.store.ServiceStore
 import com.github.kr328.clash.service.util.cancelAndJoinBlocking
 import com.github.kr328.clash.service.util.sendClashStarted
@@ -16,6 +17,7 @@ import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withContext
 
 class ClashService : BaseService() {
+    private val clock = ClockModule()
     private val self: ClashService
         get() = this
 
@@ -78,6 +80,7 @@ class ClashService : BaseService() {
         NotificationModule.onServiceCreated(this)
 
         runtime.launch()
+        clock.start(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -92,6 +95,7 @@ class ClashService : BaseService() {
 
     override fun onDestroy() {
         StatusProvider.serviceRunning = false
+        clock.stop(this)
 
         sendClashStopped(reason)
 

@@ -14,6 +14,7 @@ import (
 	C "github.com/Dreamacro/clash/constant"
 	"github.com/Dreamacro/clash/context"
 	"github.com/Dreamacro/clash/log"
+	"github.com/Dreamacro/clash/tracker"
 	"github.com/Dreamacro/clash/transport/socks5"
 	"github.com/Dreamacro/clash/tunnel"
 )
@@ -57,13 +58,18 @@ func Start(fd int, gateway, portal, dns string) (io.Closer, error) {
 			rAddr := conn.RemoteAddr().(*net.TCPAddr)
 
 			if ipv4LoopBack.Contains(rAddr.IP) {
+				if tracker.Track {
+					log.Debugln("[Tun] loopback %s", rAddr.IP)
+				}
 				conn.Close()
 
 				continue
 			}
 
 			if shouldHijackDns(dnsAddr, rAddr.IP, rAddr.Port) {
-			    log.Debugln("[Dns] hijack tcp")
+				if tracker.Track {
+					log.Debugln("[Dns] hijack tcp")
+				}
 				go func() {
 					defer conn.Close()
 
@@ -99,6 +105,9 @@ func Start(fd int, gateway, portal, dns string) (io.Closer, error) {
 				continue
 			}
 
+			if tracker.Track {
+				log.Debugln("[Tun] tcp in")
+			}
 			tunnel.TCPIn() <- context.NewConnContext(conn, createMetadata(lAddr, rAddr))
 		}
 	}
@@ -120,13 +129,18 @@ func Start(fd int, gateway, portal, dns string) (io.Closer, error) {
 			rAddr := rRAddr.(*net.UDPAddr)
 
 			if ipv4LoopBack.Contains(rAddr.IP) {
+				if tracker.Track {
+					log.Debugln("[Tun] loopback %s", rAddr.IP)
+				}
 				pool.Put(buf)
 
 				continue
 			}
 
 			if shouldHijackDns(dnsAddr, rAddr.IP, rAddr.Port) {
-			    log.Debugln("[Dns] hijack udp")
+				if tracker.Track {
+					log.Debugln("[Dns] hijack udp")
+				}
 				go func() {
 					defer pool.Put(buf)
 
@@ -141,6 +155,9 @@ func Start(fd int, gateway, portal, dns string) (io.Closer, error) {
 				continue
 			}
 
+			if tracker.Track {
+				log.Debugln("[Tun] udp in")
+			}
 			pkt := &packet{
 				local: lAddr,
 				data:  raw,

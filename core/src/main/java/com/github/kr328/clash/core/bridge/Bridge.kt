@@ -10,6 +10,22 @@ import java.io.File
 
 @Keep
 object Bridge {
+    external fun patchAddBypassIp(ip:String)
+    external fun nativeTcpTestCancel(tag:Int)
+    external fun nativeTcpTest(host:String?, timeout:Int, maxCount:Int, tag:Int, send64Bytes:Boolean, callback: StringCallback)
+    external fun nativeTcpPing(host:String?, pingCount:Int, timeout:Int, interval:Int, groupCount:Int, checkAlive:Boolean):String?
+    external fun nativeUdpPing(addr:String?, count:Int, timeout:Int, packetLength:Int):String?
+    external fun patchStartTrojanByJson(json:String)
+    external fun patchStopTrojan()
+    external fun patchStartSSWithJson(json:String):String
+    external fun patchStopSS(tag: Int)
+    external fun patchStartGtsWithFd(configJson:String, fd:Int,toolsJson:String, callback:IGtsPacketFlow):String
+    external fun patchStopGts()
+    external fun patchSetGCPercent(percent:Int)
+    external fun patchGC()
+    external fun patchFinishLog():String
+    external fun patchGetAllocMem():Int
+
     external fun nativeReset()
     external fun nativeForceGc()
     external fun nativeSuspend(suspend: Boolean)

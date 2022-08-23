@@ -11,6 +11,7 @@ import com.github.kr328.clash.common.constants.Components
 import com.github.kr328.clash.common.log.Log
 import com.github.kr328.clash.service.clash.clashRuntime
 import com.github.kr328.clash.service.clash.module.*
+import com.github.kr328.clash.service.expose.ClockModule
 import com.github.kr328.clash.service.model.AccessControlMode
 import com.github.kr328.clash.service.store.ServiceStore
 import com.github.kr328.clash.service.util.cancelAndJoinBlocking
@@ -21,13 +22,13 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.selects.select
 
 class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.Default) {
+    private val clock = ClockModule()
     private val self: TunService
         get() = this
 
     private var reason: String? = null
 
     private val runtime = clashRuntime {
-        val store = ServiceStore(self)
 
         val close = install(CloseModule(self))
         val tun = install(TunModule(self))
@@ -92,6 +93,7 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
         NotificationModule.onServiceCreated(this)
 
         runtime.launch()
+        clock.start(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -102,6 +104,7 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
 
     override fun onDestroy() {
         TunModule.requestStop()
+        clock.stop(this)
 
         StatusProvider.serviceRunning = false
 
@@ -143,12 +146,22 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
             when (store.accessControlMode) {
                 AccessControlMode.AcceptAll -> Unit
                 AccessControlMode.AcceptSelected -> {
-                    (store.accessControlPackages).forEach {
+                    val packages = store.accessControlPackages
+                    if(!packages.contains(packageName)) {
+                        Log.e("App itself may not capture network traffic" +
+                                " in some device when exclude from AcceptSelected")
+                    }
+                    packages.forEach {
                         runCatching { addAllowedApplication(it) }
                     }
                 }
                 AccessControlMode.DenySelected -> {
-                    (store.accessControlPackages).forEach {
+                    val packages = store.accessControlPackages
+                    if(packages.contains(packageName)) {
+                        Log.e("App itself may not capture network traffic" +
+                                " in some device when include in DenySelected")
+                    }
+                    packages.forEach {
                         runCatching { addDisallowedApplication(it) }
                     }
                 }

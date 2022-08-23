@@ -19,6 +19,14 @@ extern void (*fetch_report_func)(void *fetch_callback, const char *status_json);
 
 extern void (*fetch_complete_func)(void *fetch_callback, const char *error);
 
+extern void (*callback_string_func)(void *callback, const char *payload);
+
+extern void (*gts_packet_flow_output_packet_func)(void *callback, const char *packet);
+
+extern void (*gts_packet_flow_update_fd_func)(void *callback, int fd);
+
+extern int (*gts_packet_flow_can_reconnect_func)(void *callback);
+
 extern int (*logcat_received_func)(void *logcat_interface, const char *payload);
 
 extern void (*release_object_func)(void *obj);
@@ -35,6 +43,12 @@ extern void complete(void *obj, char *error);
 extern void fetch_complete(void *completable, char *exception);
 
 extern void fetch_report(void *fetch_callback, char *status_json);
+
+extern void callback_string(void *callback, char *payload);
+
+extern void gts_packet_flow_output_packet(void *callback, char *packet);
+extern void gts_packet_flow_update_fd(void *callback, int fd);
+extern int gts_packet_flow_can_reconnect(void *callback);
 
 extern int logcat_received(void *logcat_interface, char *payload);
 
