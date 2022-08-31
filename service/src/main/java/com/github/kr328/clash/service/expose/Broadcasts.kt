@@ -15,6 +15,7 @@ class Broadcasts(private val context: Application) {
         fun onStopped(cause: String?)
         fun onProfileChanged()
         fun onProfileLoaded()
+        fun onNativeEvent(event: String?)
     }
 
     open class BaseObserver : Observer {
@@ -23,6 +24,7 @@ class Broadcasts(private val context: Application) {
         override fun onStopped(cause: String?) {}
         override fun onProfileChanged() {}
         override fun onProfileLoaded() {}
+        override fun onNativeEvent(event: String?) {}
     }
 
     var clashRunning: Boolean = false
@@ -65,6 +67,12 @@ class Broadcasts(private val context: Application) {
                         it.onProfileLoaded()
                     }
                 }
+                EventBroadcaster.ACTION -> {
+                    val event = intent.getStringExtra(EventBroadcaster.EXTRA_EVENT)
+                    receivers.forEach {
+                        it.onNativeEvent(event)
+                    }
+                }
             }
         }
     }
@@ -89,6 +97,7 @@ class Broadcasts(private val context: Application) {
                 addAction(Intents.ACTION_CLASH_STOPPED)
                 addAction(Intents.ACTION_PROFILE_CHANGED)
                 addAction(Intents.ACTION_PROFILE_LOADED)
+                addAction(EventBroadcaster.ACTION)
             })
 
             registered = true

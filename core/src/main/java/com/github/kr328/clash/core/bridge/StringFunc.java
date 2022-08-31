@@ -5,6 +5,6 @@ import androidx.annotation.Nullable;
 
 @SuppressWarnings("unused")
 @Keep
-public interface StringCallback {
-    void call(@Nullable String value);
+public interface StringFunc {
+    boolean call(@Nullable String value);
 }

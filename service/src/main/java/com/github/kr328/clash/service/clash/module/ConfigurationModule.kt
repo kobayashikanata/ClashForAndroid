@@ -4,8 +4,10 @@ import android.app.Service
 import com.github.kr328.clash.common.constants.Intents
 import com.github.kr328.clash.common.log.Log
 import com.github.kr328.clash.core.Clash
+import com.github.kr328.clash.core.bridge.Bridge
 import com.github.kr328.clash.service.StatusProvider
 import com.github.kr328.clash.service.data.Database
+import com.github.kr328.clash.service.expose.EventBroadcaster
 import com.github.kr328.clash.service.store.ServiceStore
 import com.github.kr328.clash.service.util.importedDir
 import com.github.kr328.clash.service.util.sendProfileLoaded
@@ -55,6 +57,7 @@ class ConfigurationModule(service: Service) : Module<ConfigurationModule.LoadExc
                     ?: throw NullPointerException("No profile selected")
 
                 Clash.load(service.importedDir.resolve(active.uuid.toString())).await()
+                EventBroadcaster.checkInit()
 
                 val remove = Database.SelectionDao(service).querySelections(active.uuid)
                     .filterNot { Clash.patchSelector(it.proxy, it.selected) }

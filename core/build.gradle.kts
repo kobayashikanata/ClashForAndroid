@@ -69,6 +69,7 @@ afterEvaluate {
 }
 
 task("downloadGeoipDatabase") {
+    outputs.upToDateWhen { false }
     val databaseFile = geoipOutput.resolve("Country.mmdb")
     val moduleFile = geoipOutput.resolve("go.mod")
     val sourceFile = geoipOutput.resolve("blob.go")

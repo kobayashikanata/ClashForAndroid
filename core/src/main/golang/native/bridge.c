@@ -11,13 +11,15 @@ void (*fetch_report_func)(void *fetch_callback, const char *status_json);
 
 void (*fetch_complete_func)(void *fetch_callback, const char *error);
 
-void (*callback_string_func)(void *callback, const char *payload);
+void (*i_string_action_void_call_pt)(void *callback, const char *payload);
+int (*i_string_action_bool_call_pt)(void *callback, const char *payload);
 
-void (*gts_packet_flow_output_packet_func)(void *callback, const char *packet);
+void (*i_gts_packet_flow_output_packet_pt)(void *callback, const char *packet);
+void (*i_gts_packet_flow_update_fd_pt)(void *callback, int fd);
+int (*i_gts_packet_flow_can_reconnect_pt)(void *callback);
 
-void (*gts_packet_flow_update_fd_func)(void *callback, int fd);
-
-int (*gts_packet_flow_can_reconnect_func)(void *callback);
+int (*i_host_api_test_consumer_call_pt)(void *callback, const char *host, int time,
+                                        const char *error, const char *result);
 
 
 int (*logcat_received_func)(void *logcat_interface, const char *payload);
@@ -65,34 +67,6 @@ void fetch_report(void *fetch_callback, char *json_status) {
     fetch_report_func(fetch_callback, json_status);
 
     free(json_status);
-}
-
-void callback_string(void *callback, char *payload) {
-    TRACE_METHOD();
-
-    callback_string_func(callback, payload);
-
-    free(payload);
-}
-
-void gts_packet_flow_output_packet(void *callback, char *packet) {
-    TRACE_METHOD();
-
-    gts_packet_flow_output_packet_func(callback, packet);
-
-    free(packet);
-}
-
-void gts_packet_flow_update_fd(void *callback, int fd) {
-    TRACE_METHOD();
-
-    gts_packet_flow_update_fd_func(callback, fd);
-}
-
-int gts_packet_flow_can_reconnect(void *callback) {
-    TRACE_METHOD();
-
-    return gts_packet_flow_can_reconnect_func(callback);
 }
 
 int logcat_received(void *logcat_interface, char *payload) {
@@ -150,3 +124,54 @@ void log_verbose(char *msg) {
 
     free(msg);
 }
+
+
+void invoke_i_string_void(void *callback, char *payload) {
+    TRACE_METHOD();
+
+    i_string_action_void_call_pt(callback, payload);
+
+    free(payload);
+}
+
+int invoke_i_string_bool(void *callback, char *payload) {
+    TRACE_METHOD();
+
+    int result = i_string_action_bool_call_pt(callback, payload);
+    free(payload);
+
+    return result;
+}
+
+void invoke_gts_packet_flow_output_packet(void *callback, char *packet) {
+    TRACE_METHOD();
+
+    i_gts_packet_flow_output_packet_pt(callback, packet);
+
+    free(packet);
+}
+
+void invoke_gts_packet_flow_update_fd(void *callback, int fd) {
+    TRACE_METHOD();
+
+    i_gts_packet_flow_update_fd_pt(callback, fd);
+}
+
+int invoke_gts_packet_flow_can_reconnect(void *callback) {
+    TRACE_METHOD();
+
+    return i_gts_packet_flow_can_reconnect_pt(callback);
+}
+
+
+int invoke_i_host_api_test_consumer_call(void *callback, char *host, int time,
+                                         char *error, char *result) {
+    TRACE_METHOD();
+
+    int consumed = i_host_api_test_consumer_call_pt(callback, host, time, error, result);
+    free(host);
+    free(error);
+    free(result);
+    return consumed;
+}
+

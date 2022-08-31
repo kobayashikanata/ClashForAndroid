@@ -3,9 +3,11 @@ package main
 //#include "bridge.h"
 import "C"
 import (
-	"unsafe"
 	"github.com/Dreamacro/clash/tikpatch/ssplugin"
+	"unsafe"
 )
+
+var currentGtsCallback unsafe.Pointer
 
 //export patchStartTrojanWithJson
 func patchStartTrojanWithJson(configJson C.c_string) {
@@ -32,8 +34,12 @@ func patchStopSS(tag C.int) {
 
 //export patchStartGtsWithFd
 func patchStartGtsWithFd(configJson C.c_string, fd C.int, toolsJson C.c_string, packetFlow unsafe.Pointer) *C.char {
+	if currentGtsCallback != nil {
+		C.release_object(currentGtsCallback)
+	}
+	currentGtsCallback = packetFlow
 	configBytes := []byte(C.GoString(configJson))
-	callback := GtsFlowImpl{Pointer: packetFlow,}
+	callback := GtsFlowImpl{Pointer: packetFlow}
 	if err := ssplugin.StartGtsWithFD(configBytes, int(fd), C.GoString(toolsJson), callback); err != nil {
 		return marshalString(err)
 	}
@@ -43,8 +49,10 @@ func patchStartGtsWithFd(configJson C.c_string, fd C.int, toolsJson C.c_string, 
 //export patchStopGts
 func patchStopGts() {
 	ssplugin.CloseGts()
+	if currentGtsCallback != nil {
+		C.release_object(currentGtsCallback)
+	}
 }
-
 
 //export patchSetGCPercent
 func patchSetGCPercent(percent C.int) {
@@ -75,15 +83,14 @@ type GtsFlowImpl struct {
 	Pointer unsafe.Pointer
 }
 
-func (r GtsFlowImpl) OutputPacket(packet []byte)  {
-	C.gts_packet_flow_output_packet(r.Pointer, (*C.char)(unsafe.Pointer(&packet[0])))
+func (r GtsFlowImpl) OutputPacket(packet []byte) {
+	C.invoke_gts_packet_flow_output_packet(r.Pointer, (*C.char)(unsafe.Pointer(&packet[0])))
 }
 
-func (r GtsFlowImpl) UpdateFD(fd int)  {
-	C.gts_packet_flow_update_fd(r.Pointer, C.int(fd))
+func (r GtsFlowImpl) UpdateFD(fd int) {
+	C.invoke_gts_packet_flow_update_fd(r.Pointer, C.int(fd))
 }
 
 func (r GtsFlowImpl) CanReconn() bool {
-	return C.gts_packet_flow_can_reconnect(r.Pointer) != 0
+	return C.invoke_gts_packet_flow_can_reconnect(r.Pointer) != 0
 }
-

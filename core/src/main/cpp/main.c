@@ -451,8 +451,9 @@ Java_com_github_kr328_clash_core_bridge_Bridge_patchStartGtsWithFd(JNIEnv *env, 
 
     scoped_string _configJson = get_string(configJson);
     scoped_string _toolsJson = get_string(toolsJson);
+    jobject _callback = new_global(packetFlow);
 
-    scoped_string response = patchStartGtsWithFd(_configJson, fd, _toolsJson, packetFlow);
+    scoped_string response = patchStartGtsWithFd(_configJson, fd, _toolsJson, _callback);
     if (response == NULL)
         return NULL;
 
@@ -503,6 +504,38 @@ Java_com_github_kr328_clash_core_bridge_Bridge_patchGetAllocMem(JNIEnv *env, job
     return patchGetAllocMem();
 }
 
+JNIEXPORT void JNICALL
+Java_com_github_kr328_clash_core_bridge_Bridge_nativeSubscribeEvent(JNIEnv *env, jobject thiz,
+                                                                    jobject callback) {
+    TRACE_METHOD();
+
+    jobject _callback = new_global(callback);
+
+    subscribeEvent(_callback);
+}
+
+JNIEXPORT void JNICALL
+Java_com_github_kr328_clash_core_bridge_Bridge_nativeDiscoverHost(JNIEnv *env, jobject thiz,
+                                                                  jstring hosts,
+                                                                  jint timeout,
+                                                                  jint maxCount,
+                                                                  jint tag,
+                                                                  jobject callback) {
+
+    TRACE_METHOD();
+
+    scoped_string _hosts = get_string(hosts);
+    jobject _callback = new_global(callback);
+    discoverHost(_hosts, timeout, maxCount, tag, _callback);
+}
+
+JNIEXPORT void JNICALL
+Java_com_github_kr328_clash_core_bridge_Bridge_nativeStopDiscoverHost(JNIEnv *env, jobject thiz, jint tag) {
+    TRACE_METHOD();
+
+    stopDiscoverHost(tag);
+}
+
 static jmethodID m_tun_interface_mark_socket;
 static jmethodID m_tun_interface_query_socket_uid;
 static jmethodID m_completable_complete;
@@ -511,15 +544,18 @@ static jmethodID m_logcat_interface_received;
 static jmethodID m_clash_exception;
 static jmethodID m_fetch_callback_report;
 static jmethodID m_fetch_callback_complete;
-static jmethodID m_callback_string_call;
-static jmethodID m_gts_packet_flow_output_packet_call;
-static jmethodID m_gts_packet_flow_update_fd_call;
-static jmethodID m_gts_packet_flow_can_reconnect_call;
 static jmethodID m_open;
 static jmethodID m_get_message;
 static jclass c_clash_exception;
 static jclass c_content;
 static jobject o_unit;
+
+static jmethodID java_i_gts_packet_flow_m_output_packet;
+static jmethodID java_i_gts_packet_flow_m_update_fd;
+static jmethodID java_i_gts_packet_flow_m_can_reconnect;
+static jmethodID java_i_host_api_test_consumer_m_call;
+static jmethodID java_i_string_func_m_bool_call;
+static jmethodID java_i_string_action_m_void_call;
 
 static void call_tun_interface_mark_socket_impl(void *tun_interface, int fd) {
     TRACE_METHOD();
@@ -598,7 +634,7 @@ static void call_fetch_callback_complete_impl(void *fetch_callback, const char *
                            (jstring) _error);
 }
 
-static void call_callback_string_interface_impl(void *callback, const char *payload) {
+static void invoke_java_i_string_action_void_call_impl(void *callback, const char *payload) {
     TRACE_METHOD();
 
     ATTACH_JNI();
@@ -609,41 +645,89 @@ static void call_callback_string_interface_impl(void *callback, const char *payl
 
     (*env)->CallVoidMethod(env,
                            (jobject) callback,
-                           (jmethodID) m_callback_string_call,
+                           (jmethodID) java_i_string_action_m_void_call,
                            (jstring) _payload);
 }
 
-static void gts_packet_flow_output_packet_interface_impl(void *callback, const char *payload) {
+static int invoke_java_i_string_func_bool_call_impl(void *callback, const char *payload) {
+    TRACE_METHOD();
+
+    ATTACH_JNI();
+
+    jstring _payload = NULL;
+    if (payload != NULL)
+        _payload = new_string(payload);
+
+    jboolean result = (*env)->CallBooleanMethod(env,
+                           (jobject) callback,
+                           (jmethodID) java_i_string_func_m_bool_call,
+                           (jstring) _payload);
+    if(result == JNI_TRUE)
+        return 1;
+    return 0;
+}
+
+static void invoke_java_i_gts_packet_flow_output_packet_impl(void *callback, const char *payload) {
     TRACE_METHOD();
 
     ATTACH_JNI();
 
     (*env)->CallVoidMethod(env,
                            (jobject) callback,
-                           (jmethodID) m_gts_packet_flow_output_packet_call,
+                           (jmethodID) java_i_gts_packet_flow_m_output_packet,
                            (jbyteArray) payload);
 }
 
-static void gts_packet_flow_update_fd_interface_impl(void *callback, int fd) {
+static void invoke_java_i_gts_packet_flow_update_fd_impl(void *callback, int fd) {
     TRACE_METHOD();
 
     ATTACH_JNI();
 
     (*env)->CallVoidMethod(env,
                            (jobject) callback,
-                           (jmethodID) m_gts_packet_flow_update_fd_call,
+                           (jmethodID) java_i_gts_packet_flow_m_update_fd,
                            (jint) fd);
 }
 
-static int gts_packet_flow_can_reconnect_interface_impl(void *callback) {
+static int invoke_java_i_gts_packet_flow_can_reconnect_impl(void *callback) {
     TRACE_METHOD();
 
     ATTACH_JNI();
 
     jboolean result = (*env)->CallBooleanMethod(env,
                            (jobject) callback,
-                           (jmethodID) m_gts_packet_flow_can_reconnect_call);
+                           (jmethodID) java_i_gts_packet_flow_m_can_reconnect);
     if(result == JNI_TRUE)
+        return 1;
+    return 0;
+}
+
+static int invoke_java_i_host_api_test_consumer_call_impl(void *callback, const char *host, int time,
+                                                          const char *error, const char *result) {
+    TRACE_METHOD();
+
+    ATTACH_JNI();
+
+    jstring _host = NULL;
+    if (host != NULL)
+        _host = new_string(host);
+
+    jstring _error = NULL;
+    if (error != NULL)
+        _error = new_string(error);
+
+    jstring _result = NULL;
+    if (result != NULL)
+        _result = new_string(result);
+
+    if (callback == NULL) {
+        return 0;
+    }
+
+    jboolean returnResult = (*env)->CallBooleanMethod(env, (jobject) callback,
+                                                      (jmethodID) java_i_host_api_test_consumer_m_call,
+                                                      _host, (jint) time, _error, _result);
+    if(returnResult == JNI_TRUE)
         return 1;
     return 0;
 }
@@ -721,8 +805,6 @@ JNI_OnLoad(JavaVM *vm, void *reserved) {
     jclass c_fetch_callback = find_class("com/github/kr328/clash/core/bridge/FetchCallback");
     jclass c_logcat_interface = find_class("com/github/kr328/clash/core/bridge/LogcatInterface");
     jclass _c_clash_exception = find_class("com/github/kr328/clash/core/bridge/ClashException");
-    jclass c_callback_string = find_class("com/github/kr328/clash/core/bridge/StringCallback");
-    jclass c_gts_packet_flow = find_class("com/github/kr328/clash/core/bridge/IGtsPacketFlow");
     jclass _c_content = find_class("com/github/kr328/clash/core/bridge/Content");
     jclass c_throwable = find_class("java/lang/Throwable");
     jclass c_unit = find_class("kotlin/Unit");
@@ -737,12 +819,6 @@ JNI_OnLoad(JavaVM *vm, void *reserved) {
                                           "(Ljava/lang/String;)V");
     m_fetch_callback_complete = find_method(c_fetch_callback, "complete",
                                             "(Ljava/lang/String;)V");
-    m_callback_string_call = find_method(c_callback_string, "call",
-                                         "(Ljava/lang/String;)V");
-    m_gts_packet_flow_output_packet_call = find_method(c_gts_packet_flow, "outputPacket","([B)V");
-    m_gts_packet_flow_update_fd_call = find_method(c_gts_packet_flow, "updateFD","(I)V");
-    m_gts_packet_flow_can_reconnect_call = find_method(c_gts_packet_flow, "canReconnect","()Z");
-
     m_completable_complete_exceptionally = find_method(c_completable, "completeExceptionally",
                                                        "(Ljava/lang/Throwable;)Z");
     m_logcat_interface_received = find_method(c_logcat_interface, "received",
@@ -770,10 +846,31 @@ JNI_OnLoad(JavaVM *vm, void *reserved) {
     logcat_received_func = &call_logcat_interface_received_impl;
     open_content_func = &open_content_impl;
     release_object_func = &release_jni_object_impl;
-    callback_string_func = &call_callback_string_interface_impl;
-    gts_packet_flow_output_packet_func = &gts_packet_flow_output_packet_interface_impl;
-    gts_packet_flow_update_fd_func = &gts_packet_flow_update_fd_interface_impl;
-    gts_packet_flow_can_reconnect_func = &gts_packet_flow_can_reconnect_interface_impl;
+    //### IGtsPacketFlow
+    //java defines
+    jclass c_gts_packet_flow = find_class("com/github/kr328/clash/core/bridge/IGtsPacketFlow");
+    java_i_gts_packet_flow_m_output_packet = find_method(c_gts_packet_flow, "outputPacket", "([B)V");
+    java_i_gts_packet_flow_m_update_fd = find_method(c_gts_packet_flow, "updateFD", "(I)V");
+    java_i_gts_packet_flow_m_can_reconnect = find_method(c_gts_packet_flow, "canReconnect", "()Z");
+    //c defines
+    i_gts_packet_flow_output_packet_pt = &invoke_java_i_gts_packet_flow_output_packet_impl;
+    i_gts_packet_flow_update_fd_pt = &invoke_java_i_gts_packet_flow_update_fd_impl;
+    i_gts_packet_flow_can_reconnect_pt = &invoke_java_i_gts_packet_flow_can_reconnect_impl;
+
+    //### StringAction
+    jclass class_string_action = find_class("com/github/kr328/clash/core/bridge/StringAction");
+    java_i_string_action_m_void_call = find_method(class_string_action, "call","(Ljava/lang/String;)V");
+    //### StringFunc
+    jclass class_string_func = find_class("com/github/kr328/clash/core/bridge/StringFunc");
+    java_i_string_func_m_bool_call = find_method(class_string_func, "call","(Ljava/lang/String;)Z");
+    //c method pointer
+    i_string_action_void_call_pt = &invoke_java_i_string_action_void_call_impl;
+    i_string_action_bool_call_pt = &invoke_java_i_string_func_bool_call_impl;
+    //### HostApiTestConsumer
+    jclass class_host_test_consumer = find_class("com/github/kr328/clash/core/bridge/HostApiTestConsumer");
+    java_i_host_api_test_consumer_m_call = find_method(class_host_test_consumer, "call",
+                        "(Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)Z");
+    i_host_api_test_consumer_call_pt = &invoke_java_i_host_api_test_consumer_call_impl;
 
     return JNI_VERSION_1_6;
 }

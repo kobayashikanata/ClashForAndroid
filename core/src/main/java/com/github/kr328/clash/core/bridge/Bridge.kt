@@ -12,7 +12,7 @@ import java.io.File
 object Bridge {
     external fun patchAddBypassIp(ip:String)
     external fun nativeTcpTestCancel(tag:Int)
-    external fun nativeTcpTest(host:String?, timeout:Int, maxCount:Int, tag:Int, send64Bytes:Boolean, callback: StringCallback)
+    external fun nativeTcpTest(host:String?, timeout:Int, maxCount:Int, tag:Int, send64Bytes:Boolean, callback: StringAction)
     external fun nativeTcpPing(host:String?, pingCount:Int, timeout:Int, interval:Int, groupCount:Int, checkAlive:Boolean):String?
     external fun nativeUdpPing(addr:String?, count:Int, timeout:Int, packetLength:Int):String?
     external fun patchStartTrojanByJson(json:String)
@@ -25,6 +25,9 @@ object Bridge {
     external fun patchGC()
     external fun patchFinishLog():String
     external fun patchGetAllocMem():Int
+    external fun nativeSubscribeEvent(callback: StringFunc)
+    external fun nativeDiscoverHost(hosts:String, timeout:Int, maxCount: Int, tag: Int, consumer: HostApiTestConsumer)
+    external fun nativeStopDiscoverHost(tag: Int)
 
     external fun nativeReset()
     external fun nativeForceGc()

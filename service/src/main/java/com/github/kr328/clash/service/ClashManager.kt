@@ -4,7 +4,6 @@ import android.content.Context
 import com.github.kr328.clash.common.log.Log
 import com.github.kr328.clash.core.Clash
 import com.github.kr328.clash.core.bridge.Bridge
-import com.github.kr328.clash.core.bridge.StringCallback
 import com.github.kr328.clash.core.model.*
 import com.github.kr328.clash.service.data.Database
 import com.github.kr328.clash.service.data.Selection
