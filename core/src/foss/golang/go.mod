@@ -40,7 +40,7 @@ replace github.com/Dreamacro/clash => ./clash
 replace cfa/blob => ../../../build/intermediates/golang_blob
 
 
-//tikpatch
+//tsgpatch
 require (
 	github.com/Jeffail/tunny v0.1.4 // indirect
 	github.com/Yewenyu/kcp-go/v5 v5.6.3 // indirect

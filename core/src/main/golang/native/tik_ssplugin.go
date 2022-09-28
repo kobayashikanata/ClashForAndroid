@@ -1,9 +1,11 @@
+//go:build !tsglite
+
 package main
 
 //#include "bridge.h"
 import "C"
 import (
-	"github.com/Dreamacro/clash/tikpatch/ssplugin"
+	"github.com/Dreamacro/clash/tsgpatch/ssplugin"
 	"unsafe"
 )
 

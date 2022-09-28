@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/Dreamacro/clash/constant"
-	"github.com/Dreamacro/clash/tikpatch"
+	"github.com/Dreamacro/clash/tsgpatch"
 )
 
 type OverrideSlot int
@@ -60,7 +60,7 @@ func WriteOverride(slot OverrideSlot, content string) {
 }
 
 func ClearOverride(slot OverrideSlot) {
-	tikpatch.ClearOverwrite()
+	tsgpatch.ClearOverwrite()
 	switch slot {
 	case OverrideSlotPersist:
 		_ = os.Remove(overridePersistPath())

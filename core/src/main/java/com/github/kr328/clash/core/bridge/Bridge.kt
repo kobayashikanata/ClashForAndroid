@@ -25,7 +25,7 @@ object Bridge {
     external fun patchGC()
     external fun patchFinishLog():String
     external fun patchGetAllocMem():Int
-    external fun nativeSubscribeEvent(callback: StringFunc)
+    external fun nativeSubscribeEvent(callback: String2Func)
     external fun nativeDiscoverHost(hosts:String, timeout:Int, maxCount: Int, tag: Int, consumer: HostApiTestConsumer)
     external fun nativeStopDiscoverHost(tag: Int)
 

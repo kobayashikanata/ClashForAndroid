@@ -555,6 +555,7 @@ static jmethodID java_i_gts_packet_flow_m_update_fd;
 static jmethodID java_i_gts_packet_flow_m_can_reconnect;
 static jmethodID java_i_host_api_test_consumer_m_call;
 static jmethodID java_i_string_func_m_bool_call;
+static jmethodID java_i_string_func2_m_bool_call;
 static jmethodID java_i_string_action_m_void_call;
 
 static void call_tun_interface_mark_socket_impl(void *tun_interface, int fd) {
@@ -662,6 +663,29 @@ static int invoke_java_i_string_func_bool_call_impl(void *callback, const char *
                            (jobject) callback,
                            (jmethodID) java_i_string_func_m_bool_call,
                            (jstring) _payload);
+    if(result == JNI_TRUE)
+        return 1;
+    return 0;
+}
+
+static int invoke_java_i_string_func2_bool_call_impl(void *callback, const char *p1, const char *p2) {
+    TRACE_METHOD();
+
+    ATTACH_JNI();
+
+    jstring _p1 = NULL;
+    if (p1 != NULL)
+        _p1 = new_string(p1);
+
+    jstring _p2 = NULL;
+    if (p2 != NULL)
+        _p2 = new_string(p2);
+
+    jboolean result = (*env)->CallBooleanMethod(env,
+                                                (jobject) callback,
+                                                (jmethodID) java_i_string_func2_m_bool_call,
+                                                (jstring) _p1,
+                                                (jstring) _p2);
     if(result == JNI_TRUE)
         return 1;
     return 0;
@@ -863,9 +887,13 @@ JNI_OnLoad(JavaVM *vm, void *reserved) {
     //### StringFunc
     jclass class_string_func = find_class("com/github/kr328/clash/core/bridge/StringFunc");
     java_i_string_func_m_bool_call = find_method(class_string_func, "call","(Ljava/lang/String;)Z");
+    //### String2Func
+    jclass class_string_func2 = find_class("com/github/kr328/clash/core/bridge/String2Func");
+    java_i_string_func2_m_bool_call = find_method(class_string_func2, "call","(Ljava/lang/String;Ljava/lang/String;)Z");
     //c method pointer
     i_string_action_void_call_pt = &invoke_java_i_string_action_void_call_impl;
     i_string_action_bool_call_pt = &invoke_java_i_string_func_bool_call_impl;
+    i_string2_action_bool_call_pt = &invoke_java_i_string_func2_bool_call_impl;
     //### HostApiTestConsumer
     jclass class_host_test_consumer = find_class("com/github/kr328/clash/core/bridge/HostApiTestConsumer");
     java_i_host_api_test_consumer_m_call = find_method(class_host_test_consumer, "call",

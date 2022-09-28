@@ -69,6 +69,9 @@ extern void invoke_i_string_void(void *callback, char *payload);
 extern int (*i_string_action_bool_call_pt)(void *callback, const char *payload);
 extern int invoke_i_string_bool(void *callback, char *payload);
 
+extern int (*i_string2_action_bool_call_pt)(void *callback, const char *p1, const char *p2);
+extern int invoke_i_string2_bool(void *callback, char *p1, char *p2);
+
 extern int (*i_host_api_test_consumer_call_pt)(void *callback, const char *host, int time,
                                                const char *error, const char *result);
 extern int invoke_i_host_api_test_consumer_call(void *callback, char *host, int time,

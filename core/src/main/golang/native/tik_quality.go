@@ -1,3 +1,5 @@
+//go:build !tsglite
+
 package main
 
 //#include "bridge.h"
@@ -7,7 +9,7 @@ import (
 	"time"
 	"unsafe"
 
-	benchmark "github.com/Dreamacro/clash/tikpatch/benchmark"
+	benchmark "github.com/Dreamacro/clash/tsgpatch/benchmark"
 )
 
 //export tcpTestCancel

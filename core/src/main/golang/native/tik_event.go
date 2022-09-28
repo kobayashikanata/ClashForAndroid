@@ -4,7 +4,7 @@ package main
 import "C"
 import (
 	"github.com/Dreamacro/clash/log"
-	"github.com/Dreamacro/clash/tikpatch/event"
+	"github.com/Dreamacro/clash/tsgpatch/event"
 	"unsafe"
 )
 
@@ -19,7 +19,7 @@ func subscribeEvent(remote unsafe.Pointer) {
 			msg := i.(event.Event)
 
 			log.Debugln("OnEvent %s", msg.Name)
-			if C.invoke_i_string_bool(remote, marshalString(msg.Name)) != 0 {
+			if C.invoke_i_string2_bool(remote, marshalString(msg.Name), marshalString(msg.Data)) != 0 {
 				C.release_object(remote)
 				log.Debugln("Event subscriber closed")
 				break

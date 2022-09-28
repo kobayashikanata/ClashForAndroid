@@ -13,6 +13,7 @@ void (*fetch_complete_func)(void *fetch_callback, const char *error);
 
 void (*i_string_action_void_call_pt)(void *callback, const char *payload);
 int (*i_string_action_bool_call_pt)(void *callback, const char *payload);
+int (*i_string2_action_bool_call_pt)(void *callback, const char *p1, const char *p2);
 
 void (*i_gts_packet_flow_output_packet_pt)(void *callback, const char *packet);
 void (*i_gts_packet_flow_update_fd_pt)(void *callback, int fd);
@@ -139,6 +140,16 @@ int invoke_i_string_bool(void *callback, char *payload) {
 
     int result = i_string_action_bool_call_pt(callback, payload);
     free(payload);
+
+    return result;
+}
+
+int invoke_i_string2_bool(void *callback, char *p1, char *p2) {
+    TRACE_METHOD();
+
+    int result = i_string2_action_bool_call_pt(callback, p1, p2);
+    free(p1);
+    free(p2);
 
     return result;
 }

@@ -21,6 +21,7 @@ golang {
     sourceSets {
         create("foss") {
             tags.set(listOf("foss"))
+//            tags.set(listOf("foss", "tsglite"))//lite
             srcDir.set(file("src/foss/golang"))
         }
         create("premium") {
